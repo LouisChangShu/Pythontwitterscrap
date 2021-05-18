@@ -1,0 +1,58 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.keys import Keys
+from bs4 import BeautifulSoup as Soup
+import requests as rq
+import time
+import lxml
+import csv
+
+
+# 啟動selenium
+options = webdriver.ChromeOptions()
+driver = webdriver.Chrome(options=options)
+driver.get("https://twitter.com/login")
+time.sleep(4)
+
+#輸入email 
+driver.find_element_by_xpath('//*[@id="react-root"]/div/div/div[2]/main/div/div/div[2]/form/div/div[1]/label/div/div[2]/div/input').send_keys('key your own email')
+time.sleep(0.5)
+
+#輸入password
+driver.find_element_by_xpath('//*[@id="react-root"]/div/div/div[2]/main/div/div/div[2]/form/div/div[2]/label/div/div[2]/div/input').send_keys('key your own password')
+time.sleep(0.5)
+
+#登入
+driver.find_element_by_xpath('//*[@id="react-root"]/div/div/div[2]/main/div/div/div[2]/form/div/div[3]/div').click()
+time.sleep(3)
+
+#切換到目標網站
+driver.get("https://twitter.com/Tesla")
+time.sleep(3)
+
+#Scroll Down
+#scrolltimes代表頁面滾動的次數
+
+def scroll(scrolltimes):
+  for i in range(scrolltimes):
+    # 每一次頁面滾動都是滑到網站最下方
+    js = 'window.scrollTo({top: document.body.scrollHeight,behavior: "smooth"});'
+    driver.execute_script(js)
+    time.sleep(2)
+scroll(2)
+
+
+soup = Soup(driver.page_source, "lxml")
+#抓取全部
+all_twitter = []
+all_twitter = soup.find_all(class_="css-1dbjc4n r-18u37iz r-1wtj0ep r-1s2bzr4 r-1mdbhws",attrs={"aria-label": True})
+
+
+#抓取日期
+post_time = []
+post_time = soup.find_all(class_="css-4rbku5 css-18t94o4 css-901oao r-m0bqgq r-1loqt21 r-1q142lx r-1qd0xha r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-3s2u2q r-qvutc0",attrs={"aria-label": True})
+
+with open('Tesla_Twitter.csv', 'w', newline='') as Tesla_Twitter:
+    writer = csv.writer(Tesla_Twitter)
+    writer.writerow(post_time)
+    writer.writerow(all_twitter)
